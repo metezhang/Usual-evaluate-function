@@ -1,4 +1,6 @@
+#Date:2023-10-31
 import numpy as np
+
 
 def area_ave_rmse(data_real: np.array, data_predict: np.array, lat:np.array) -> np.array:
     """_summary_
