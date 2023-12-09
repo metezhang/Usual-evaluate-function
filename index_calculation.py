@@ -2,7 +2,7 @@
 import numpy as np
 
 
-def area_ave_rmse(data_real: np.array, data_predict: np.array, lat:np.array) -> np.array:
+def area_ave_rmse(data_real: np.array, data_predict: np.array, lat:np.array, lon:np.array) -> np.array:
     """_summary_
 
     Args:
@@ -13,16 +13,24 @@ def area_ave_rmse(data_real: np.array, data_predict: np.array, lat:np.array) -> 
     Returns:
         np.array: rmse of shape (time,day,lev)
     """
-    data_diff = data_predict - data_real
+    mask = np.array(np.isnan(data_real[0,0,0]))
     angle_radians = np.radians(lat)
-    angle_radians = angle_radians[np.newaxis, np.newaxis, np.newaxis,:, np.newaxis]
-    data_diff = data_diff*np.cos(angle_radians)
-
-    data_diff = data_diff.reshape(data_diff.shape[0],data_diff.shape[1],data_diff.shape[2],data_diff.shape[3]*data_diff.shape[4])
+    angle_radians = angle_radians[:, np.newaxis]
+    angle_radians = np.tile(angle_radians, [1, len(lon)])
+    angle_radians_mask = angle_radians
+    angle_radians_mask[mask] = np.nan
+    weights = np.cos(angle_radians_mask)/ np.nansum(np.cos(angle_radians_mask))
+    
+    data_diff = data_predict - data_real
     data_diff2 = data_diff**2
-    mse = np.nanmean(data_diff2,axis=3)
+    data_diff2 = data_diff2*weights
+    data_diff2 = data_diff2.reshape(data_diff.shape[0], data_diff.shape[1], data_diff.shape[2], data_diff.shape[3]*data_diff.shape[4])
+    
+    mse = np.nansum(data_diff2, axis=3)
     rmse = np.sqrt(mse)
     return rmse
+
+
 
 def area_point_rmse(data_real: np.array, data_predict: np.array) -> np.array:
     """_summary_
@@ -87,7 +95,7 @@ def area_ave_r(data_real: np.array, data_predict: np.array) -> np.array:
 
     return r
 
-def area_ave_bias(data_real: np.array, data_predict: np.array, lat: np.array) -> np.array:
+def area_ave_bias(data_real: np.array, data_predict: np.array, lat: np.array, lon: np.array) -> np.array:
     """_summary_
 
     Args:
@@ -97,10 +105,16 @@ def area_ave_bias(data_real: np.array, data_predict: np.array, lat: np.array) ->
     Returns:
         np.array: rmse of shape (time,day,lev)
     """
-    data_diff = data_predict - data_real
+    mask = np.array(np.isnan(data_real[0,0,0]))
     angle_radians = np.radians(lat)
-    angle_radians = angle_radians[np.newaxis, np.newaxis, np.newaxis,:, np.newaxis]
-    data_diff = data_diff*np.cos(angle_radians)
+    angle_radians = angle_radians[:, np.newaxis]
+    angle_radians = np.tile(angle_radians, [1, len(lon)])
+    angle_radians_mask = angle_radians
+    angle_radians_mask[mask] = np.nan
+    weights = np.cos(angle_radians_mask)/ np.nansum(np.cos(angle_radians_mask))
+    
+    data_diff = data_predict - data_real
+    data_diff = data_diff*weights
     
     data_diff = data_diff.reshape(data_diff.shape[0],data_diff.shape[1],data_diff.shape[2],data_diff.shape[3]*data_diff.shape[4])
     bias = np.nanmean(data_diff,axis=3)
