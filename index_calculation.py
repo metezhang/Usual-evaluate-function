@@ -1,8 +1,7 @@
 #Date:2023-10-31
 import numpy as np
 
-
-def area_ave_rmse(data_real: np.array, data_predict: np.array, lat:np.array, lon:np.array) -> np.array:
+def area_ave_rmse(data_real: np.array, data_predict: np.array, lat:np.array) -> np.array:
     """_summary_
 
     Args:
@@ -16,7 +15,7 @@ def area_ave_rmse(data_real: np.array, data_predict: np.array, lat:np.array, lon
     mask = np.array(np.isnan(data_real[0,0,0]))
     angle_radians = np.radians(lat)
     angle_radians = angle_radians[:, np.newaxis]
-    angle_radians = np.tile(angle_radians, [1, len(lon)])
+    angle_radians = np.tile(angle_radians, [1, data_real.shape[-1]])
     angle_radians_mask = angle_radians
     angle_radians_mask[mask] = np.nan
     weights = np.cos(angle_radians_mask)/ np.nansum(np.cos(angle_radians_mask))
@@ -95,7 +94,7 @@ def area_ave_r(data_real: np.array, data_predict: np.array) -> np.array:
 
     return r
 
-def area_ave_bias(data_real: np.array, data_predict: np.array, lat: np.array, lon: np.array) -> np.array:
+def area_ave_bias(data_real: np.array, data_predict: np.array, lat: np.array) -> np.array:
     """_summary_
 
     Args:
@@ -108,7 +107,7 @@ def area_ave_bias(data_real: np.array, data_predict: np.array, lat: np.array, lo
     mask = np.array(np.isnan(data_real[0,0,0]))
     angle_radians = np.radians(lat)
     angle_radians = angle_radians[:, np.newaxis]
-    angle_radians = np.tile(angle_radians, [1, len(lon)])
+    angle_radians = np.tile(angle_radians, [1, data_real.shape[-1]])
     angle_radians_mask = angle_radians
     angle_radians_mask[mask] = np.nan
     weights = np.cos(angle_radians_mask)/ np.nansum(np.cos(angle_radians_mask))
